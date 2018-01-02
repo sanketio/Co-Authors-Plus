@@ -51,8 +51,19 @@ before_script:
         elif [[ ${TRAVIS_PHP_VERSION:0:3} != "5.2" ]]; then
           composer global require "phpunit/phpunit=4.8.*"
         fi
-    - which phpunit
-    - ~/.composer/vendor/bin/phpunit --version
+    - |
+        if [[ -n $COMPOSER_BIN_DIR && -x $COMPOSER_BIN_DIR/phpunit ]]; then
+          echo "composer"
+          $COMPOSER_BIN_DIR/phpunit --version
+        elif [[ -n $(jq -r '.config["bin-dir"]' composer.json) && -x $(jq -r '.config["bin-dir"]' composer.json)/phpunit ]]; then
+          echo "composer.json"
+          $(jq -r '.config["bin-dir"]' composer.json)/phpunit --version
+        elif [[ -x $TRAVIS_BUILD_DIR/vendor/bin/phpunit ]]; then
+          echo "travis vendor"
+          $TRAVIS_BUILD_DIR/vendor/bin/phpunit --version
+        else
+          phpunit --version
+        fi
 
 script:
     # Search for PHP syntax errors.
@@ -68,4 +79,12 @@ script:
     # --extensions: Only sniff PHP files.
     - if [[ "$SNIFF" == "1" ]]; then $PHPCS_DIR/scripts/phpcs -p -s -v -n . --standard="WordPress-VIP" --extensions=php; fi
     # Unit tests
-    - ~/.composer/vendor/bin/phpunit
+    - if [[ -n $COMPOSER_BIN_DIR && -x $COMPOSER_BIN_DIR/phpunit ]]; then
+        $COMPOSER_BIN_DIR/phpunit
+      elif [[ -n $(jq -r '.config["bin-dir"]' composer.json) && -x $(jq -r '.config["bin-dir"]' composer.json)/phpunit ]]; then
+        $(jq -r '.config["bin-dir"]' composer.json)/phpunit
+      elif [[ -x $TRAVIS_BUILD_DIR/vendor/bin/phpunit ]]; then
+        $TRAVIS_BUILD_DIR/vendor/bin/phpunit
+      else
+        phpunit
+      fi

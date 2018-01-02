@@ -52,7 +52,7 @@ before_script:
           composer global require "phpunit/phpunit=4.8.*"
         fi
     - which phpunit
-    - phpunit --version
+    - ~/.composer/vendor/bin/phpunit --version
 
 script:
     # Search for PHP syntax errors.
@@ -68,4 +68,4 @@ script:
     # --extensions: Only sniff PHP files.
     - if [[ "$SNIFF" == "1" ]]; then $PHPCS_DIR/scripts/phpcs -p -s -v -n . --standard="WordPress-VIP" --extensions=php; fi
     # Unit tests
-    - phpunit
+    - ~/.composer/vendor/bin/phpunit

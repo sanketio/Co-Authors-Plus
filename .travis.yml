@@ -48,6 +48,8 @@ before_script:
     - if [[ "$SNIFF" == "1" ]]; then phpenv rehash; fi
     # Set up unit tests
     - bash bin/install-wp-tests.sh wordpress_test root '' localhost $WP_VERSION
+    # Properly handle PHPUnit versions
+    - export PATH="$HOME/.composer/vendor/bin:$PATH"
     - |
         if [[ ${TRAVIS_PHP_VERSION:0:3} == "5.6" ]]; then
           composer global require "phpunit/phpunit=4.8.*"
